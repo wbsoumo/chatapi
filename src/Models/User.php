@@ -177,9 +177,14 @@ class User {
         $stmt = $db->prepare("
             SELECT 1 FROM blocked_users 
             WHERE (user_id = :user_id AND blocked_user_id = :target_id)
-               OR (user_id = :target_id AND blocked_user_id = :user_id)
+               OR (user_id = :target_id_2 AND blocked_user_id = :user_id_2)
         ");
-        $stmt->execute(['user_id' => $userId, 'target_id' => $targetUserId]);
+        $stmt->execute([
+            'user_id' => $userId,
+            'target_id' => $targetUserId,
+            'user_id_2' => $userId,
+            'target_id_2' => $targetUserId
+        ]);
         return (bool)$stmt->fetchColumn();
     }
 
