@@ -14,6 +14,11 @@ class AuthMiddleware {
         $authHeader = $headers['Authorization'] ?? $headers['authorization'] ?? null;
 
         if (!$authHeader) {
+            // Fallback for Apache stripping Authorization header
+            $authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? null;
+        }
+
+        if (!$authHeader) {
             Response::error('Unauthorized: Authorization header is missing', 401);
         }
 

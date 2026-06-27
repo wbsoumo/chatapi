@@ -1,5 +1,9 @@
 RewriteEngine On
 
+# Pass Authorization Header to PHP
+RewriteCond %{HTTP:Authorization} ^(.*)
+RewriteRule .* - [e=HTTP_AUTHORIZATION:%1]
+
 # Allow direct access to uploaded files or assets
 RewriteCond %{REQUEST_FILENAME} -f [OR]
 RewriteCond %{REQUEST_FILENAME} -d
