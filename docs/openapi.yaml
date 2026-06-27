@@ -1,0 +1,154 @@
+openapi: 3.0.3
+info:
+  title: WhatsApp-Like Android Chat Backend API
+  description: High-performance, scalable PHP backend API supporting JWT, Fast2SMS OTP, Incremental Synchronization, and Media uploads.
+  version: 1.0.0
+servers:
+  - url: http://localhost:8000
+    description: Local Development Server
+paths:
+  /api/auth/otp/generate:
+    post:
+      summary: Generate WhatsApp OTP
+      description: Generates a 6-digit verification code and transmits it via Fast2SMS API.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - mobile_number
+              properties:
+                mobile_number:
+                  type: string
+                  example: "+919876543210"
+      responses:
+        "200":
+          description: OTP generated successfully
+        "429":
+          description: Rate limited, resend timer active
+
+  /api/auth/otp/verify:
+    post:
+      summary: Verify WhatsApp OTP
+      description: Verifies OTP code, registers user if new, and issues JWT token.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - mobile_number
+                - otp
+              properties:
+                mobile_number:
+                  type: string
+                  example: "+919876543210"
+                otp:
+                  type: string
+                  example: "123456"
+      responses:
+        "200":
+          description: OTP verified and token issued
+
+  /api/contact/sync:
+    post:
+      summary: Contact Synchronization
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - contacts
+              properties:
+                contacts:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                        example: "Alice"
+                      phone:
+                        type: string
+                        example: "+919876543210"
+      responses:
+        "200":
+          description: Returns only registered users matching contact list
+
+  /api/chat/sync:
+    post:
+      summary: Incremental Synchronize Chats
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                sync_items:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      conversation_id:
+                        type: string
+                        format: uuid
+                      last_message_id:
+                        type: integer
+                last_sync_time:
+                  type: string
+                  example: "2026-06-27 12:00:00"
+      responses:
+        "200":
+          description: Returns list of changed, new, deleted, and reacted messages since sync point
+
+  /api/message/send:
+    post:
+      summary: Send Message
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - message_uuid
+                - conversation_id
+                - type
+              properties:
+                message_uuid:
+                  type: string
+                  format: uuid
+                conversation_id:
+                  type: string
+                  format: uuid
+                type:
+                  type: string
+                  enum: [text, image, video, voice, doc, gif, sticker, location]
+                content:
+                  type: string
+                reply_to_message_id:
+                  type: integer
+                media_details:
+                  type: object
+      responses:
+        "200":
+          description: Message sent and registered
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

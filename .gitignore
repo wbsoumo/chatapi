@@ -1,0 +1,9 @@
+/vendor/
+.env
+/logs/
+/storage/rate_limits/
+.phpunit.cache/
+/public/uploads/media/*
+/public/uploads/profiles/*
+/public/uploads/stickers/*
+!/public/uploads/default_video_thumb.webp
