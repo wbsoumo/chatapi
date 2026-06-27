@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp API E2E Integration Tester</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0b141a;
+            --card-bg: #111b21;
+            --accent-color: #00a884;
+            --accent-hover: #008f72;
+            --text-color: #e9edef;
+            --text-muted: #8696a0;
+            --border-color: #222e35;
+            --error-color: #f15c6d;
+            --success-color: #00ffca;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1100px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 900px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 800;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        h2 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 8px;
+            color: var(--accent-color);
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: var(--text-muted);
+        }
+
+        input {
+            width: 100%;
+            background: #202c33;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px;
+            color: white;
+            font-family: inherit;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
+        .row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .btn {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            background-color: var(--accent-hover);
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+        }
+
+        .btn-secondary:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .console-container {
+            grid-column: span 2;
+            background: #090e11;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            max-height: 400px;
+            overflow-y: auto;
+            box-shadow: inset 0 4px 15px rgba(0, 0, 0, 0.6);
+        }
+
+        @media (max-width: 900px) {
+            .console-container {
+                grid-column: span 1;
+            }
+        }
+
+        .console-log {
+            margin-bottom: 12px;
+            border-bottom: 1px solid #182229;
+            padding-bottom: 12px;
+        }
+
+        .log-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px;
+            font-weight: 700;
+        }
+
+        .log-req { color: #5bc0be; }
+        .log-res { color: var(--success-color); }
+        .log-error { color: var(--error-color); }
+
+        .log-body {
+            white-space: pre-wrap;
+            color: #d1d7db;
+            background: #111b21;
+            padding: 10px;
+            border-radius: 6px;
+            margin-top: 4px;
+        }
+
+        .step-badge {
+            display: inline-block;
+            background: rgba(0, 168, 132, 0.15);
+            color: var(--accent-color);
+            border: 1px solid rgba(0, 168, 132, 0.3);
+            border-radius: 4px;
+            padding: 2px 6px;
+            font-size: 11px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .token-indicator {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 5px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--error-color);
+        }
+
+        .dot.active {
+            background-color: var(--success-color);
+            box-shadow: 0 0 8px var(--success-color);
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>E2E API Integration Test Console</h1>
+    <p class="subtitle">Simulate two users signing in, syncing, and starting a conversation</p>
+</header>
+
+<div class="container">
+    
+    <!-- USER A PANEL -->
+    <div class="card">
+        <span class="step-badge">USER A (Sender)</span>
+        <h2>User A Configuration</h2>
+        
+        <div class="form-group">
+            <label>Mobile Number</label>
+            <input type="text" id="userA_phone" value="+918016222991" placeholder="e.g. +918016222991">
+        </div>
+        
+        <div class="row form-group">
+            <div>
+                <label>Step 1: Get OTP</label>
+                <button class="btn" onclick="generateOtp('A')">Send OTP</button>
+            </div>
+            <div>
+                <label>OTP Code</label>
+                <input type="text" id="userA_otp" placeholder="6-digit code">
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <button class="btn btn-secondary" onclick="verifyOtp('A')">Step 2: Verify & Login A</button>
+            <div class="token-indicator">
+                <span class="dot" id="dotA"></span> User A Token Status: <span id="statusA">Logged Out</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- USER B PANEL -->
+    <div class="card">
+        <span class="step-badge">USER B (Receiver)</span>
+        <h2>User B Configuration</h2>
+        
+        <div class="form-group">
+            <label>Mobile Number</label>
+            <input type="text" id="userB_phone" value="9641184886" placeholder="e.g. 9641184886">
+        </div>
+        
+        <div class="row form-group">
+            <div>
+                <label>Step 3: Get OTP</label>
+                <button class="btn" onclick="generateOtp('B')">Send OTP</button>
+            </div>
+            <div>
+                <label>OTP Code</label>
+                <input type="text" id="userB_otp" placeholder="6-digit code">
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <button class="btn btn-secondary" onclick="verifyOtp('B')">Step 4: Verify & Login B</button>
+            <div class="token-indicator">
+                <span class="dot" id="dotB"></span> User B Token Status: <span id="statusB">Logged Out</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ACTIONS PANEL -->
+    <div class="card" style="grid-column: span 2;">
+        <span class="step-badge">FLOW OPERATIONS</span>
+        <h2>End-to-End Chat Initiation</h2>
+        
+        <div class="row" style="margin-bottom: 15px;">
+            <div>
+                <label>Step 5: Sync User B's Number to User A's Contacts</label>
+                <button class="btn" onclick="syncContacts()">Sync B inside A Contacts</button>
+            </div>
+            <div>
+                <label>Step 6: Start 1-to-1 Chat</label>
+                <button class="btn" onclick="startChat()">Start Chat</button>
+            </div>
+        </div>
+
+        <div class="form-group" style="border-top: 1px solid var(--border-color); padding-top: 20px;">
+            <label>Step 7: Send Message (From User A to User B)</label>
+            <div style="display: flex; gap: 15px;">
+                <input type="text" id="chat_message" value="Hello User B, let's start chatting!" style="flex: 1;">
+                <button class="btn" onclick="sendMessage()">Send Message</button>
+            </div>
+        </div>
+
+        <div class="row form-group">
+            <div>
+                <label>Conversation UUID</label>
+                <input type="text" id="conversation_id" placeholder="Generated Conversation UUID" readonly>
+            </div>
+            <div>
+                <label>Last Message UUID</label>
+                <input type="text" id="message_uuid" placeholder="Generated Message UUID" readonly>
+            </div>
+        </div>
+    </div>
+
+    <!-- LOG CONSOLE -->
+    <div class="console-container">
+        <h2>Live API Request / Response Log Console</h2>
+        <div id="console_logs">
+            <div style="color: var(--text-muted);">Console ready. Trigger API requests above...</div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    let tokens = {
+        A: null,
+        B: null
+    };
+    
+    // Auto-detect base URL
+    const baseUrl = window.location.origin + window.location.pathname.replace(/\/test\.html$/, '');
+
+    function logToConsole(method, url, requestBody, responseStatus, responseBody, isError = false) {
+        const consoleLogs = document.getElementById('console_logs');
+        if (consoleLogs.innerHTML.includes('Console ready.')) {
+            consoleLogs.innerHTML = '';
+        }
+        
+        const logHtml = `
+            <div class="console-log">
+                <div class="log-header">
+                    <span class="log-req">[${method}] ${url}</span>
+                    <span class="${isError ? 'log-error' : 'log-res'}">HTTP ${responseStatus}</span>
+                </div>
+                <div><strong>Request Payload:</strong></div>
+                <div class="log-body">${JSON.stringify(requestBody, null, 4)}</div>
+                <div style="margin-top: 8px;"><strong>Response Data:</strong></div>
+                <div class="log-body">${JSON.stringify(responseBody, null, 4)}</div>
+            </div>
+        `;
+        
+        consoleLogs.insertAdjacentHTML('afterbegin', logHtml);
+    }
+
+    async function apiRequest(method, endpoint, body = null, token = null) {
+        const url = `${baseUrl}${endpoint}`;
+        const headers = {
+            'Content-Type': 'application/json'
+        };
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+        
+        const config = {
+            method: method,
+            headers: headers
+        };
+        
+        if (body) {
+            config.body = JSON.stringify(body);
+        }
+
+        try {
+            const response = await fetch(url, config);
+            const data = await response.json();
+            logToConsole(method, endpoint, body, response.status, data, !response.ok);
+            return { ok: response.ok, data: data };
+        } catch (e) {
+            logToConsole(method, endpoint, body, 'ERROR', { error: e.message }, true);
+            return { ok: false, data: { error: e.message } };
+        }
+    }
+
+    async function generateOtp(userKey) {
+        const phone = document.getElementById(`user${userKey}_phone`).value;
+        await apiRequest('POST', '/auth/otp/generate', { mobile_number: phone });
+    }
+
+    async function verifyOtp(userKey) {
+        const phone = document.getElementById(`user${userKey}_phone`).value;
+        const otp = document.getElementById(`user${userKey}_otp`).value;
+        
+        const res = await apiRequest('POST', '/auth/otp/verify', {
+            mobile_number: phone,
+            otp: otp
+        });
+
+        if (res.ok && res.data.status && res.data.data.tokens) {
+            tokens[userKey] = res.data.data.tokens.access_token;
+            document.getElementById(`status${userKey}`).innerText = 'Logged In';
+            document.getElementById(`status${userKey}`).style.color = 'var(--success-color)';
+            document.getElementById(`dot${userKey}`).classList.add('active');
+        } else {
+            alert(`Failed to login User ${userKey}. Check logs.`);
+        }
+    }
+
+    async function syncContacts() {
+        if (!tokens.A) {
+            alert('Please login User A first.');
+            return;
+        }
+        
+        const phoneB = document.getElementById('userB_phone').value;
+        
+        await apiRequest('POST', '/contact/sync', {
+            contacts: [
+                { name: "User B Friend", phone: phoneB }
+            ]
+        }, tokens.A);
+    }
+
+    async function startChat() {
+        if (!tokens.A) {
+            alert('Please login User A first.');
+            return;
+        }
+        
+        const phoneB = document.getElementById('userB_phone').value;
+        
+        const res = await apiRequest('POST', '/chat/start', {
+            receiver_phone: phoneB
+        }, tokens.A);
+
+        if (res.ok && res.data.status && res.data.data.conversation) {
+            const convId = res.data.data.conversation.conversation_id;
+            document.getElementById('conversation_id').value = convId;
+        } else {
+            alert('Failed to initialize conversation. Check logs.');
+        }
+    }
+
+    async function sendMessage() {
+        if (!tokens.A) {
+            alert('Please login User A first.');
+            return;
+        }
+        
+        const convId = document.getElementById('conversation_id').value;
+        if (!convId) {
+            alert('Please start a chat first to get a Conversation UUID.');
+            return;
+        }
+
+        // Generate a random UUID for the message
+        const msgUuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+            var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+        });
+        document.getElementById('message_uuid').value = msgUuid;
+
+        const content = document.getElementById('chat_message').value;
+
+        await apiRequest('POST', '/message/send', {
+            message_uuid: msgUuid,
+            conversation_id: convId,
+            type: 'text',
+            content: content
+        }, tokens.A);
+    }
+</script>
+
+</body>
+</html>
