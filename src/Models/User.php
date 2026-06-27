@@ -117,13 +117,15 @@ class User {
             // Update online_status table
             $driver = $db->getAttribute(PDO::ATTR_DRIVER_NAME);
             $sql = ($driver === 'sqlite')
-                ? "INSERT INTO online_status (user_id, status, last_seen) VALUES (:user_id, :status, :last_seen) ON CONFLICT(user_id) DO UPDATE SET status = :status, last_seen = :last_seen"
-                : "INSERT INTO online_status (user_id, status, last_seen) VALUES (:user_id, :status, :last_seen) ON DUPLICATE KEY UPDATE status = :status, last_seen = :last_seen";
+                ? "INSERT INTO online_status (user_id, status, last_seen) VALUES (:user_id, :status, :last_seen) ON CONFLICT(user_id) DO UPDATE SET status = :status_update, last_seen = :last_seen_update"
+                : "INSERT INTO online_status (user_id, status, last_seen) VALUES (:user_id, :status, :last_seen) ON DUPLICATE KEY UPDATE status = :status_update, last_seen = :last_seen_update";
             $stmt2 = $db->prepare($sql);
             $stmt2->execute([
                 'user_id' => $userId,
                 'status' => $status,
-                'last_seen' => $lastSeen
+                'last_seen' => $lastSeen,
+                'status_update' => $status,
+                'last_seen_update' => $lastSeen
             ]);
 
             $db->commit();
@@ -145,10 +147,15 @@ class User {
             // Update device_tokens table
             $driver = $db->getAttribute(PDO::ATTR_DRIVER_NAME);
             $sql = ($driver === 'sqlite')
-                ? "INSERT INTO device_tokens (user_id, device_token, platform) VALUES (:user_id, :token, :platform) ON CONFLICT(user_id, device_token) DO UPDATE SET platform = :platform, updated_at = CURRENT_TIMESTAMP"
-                : "INSERT INTO device_tokens (user_id, device_token, platform) VALUES (:user_id, :token, :platform) ON DUPLICATE KEY UPDATE platform = :platform, updated_at = CURRENT_TIMESTAMP";
+                ? "INSERT INTO device_tokens (user_id, device_token, platform) VALUES (:user_id, :token, :platform) ON CONFLICT(user_id, device_token) DO UPDATE SET platform = :platform_update, updated_at = CURRENT_TIMESTAMP"
+                : "INSERT INTO device_tokens (user_id, device_token, platform) VALUES (:user_id, :token, :platform) ON DUPLICATE KEY UPDATE platform = :platform_update, updated_at = CURRENT_TIMESTAMP";
             $stmt2 = $db->prepare($sql);
-            $stmt2->execute(['user_id' => $userId, 'token' => $token, 'platform' => $platform]);
+            $stmt2->execute([
+                'user_id' => $userId, 
+                'token' => $token, 
+                'platform' => $platform,
+                'platform_update' => $platform
+            ]);
 
             $db->commit();
             return true;

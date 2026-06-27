@@ -70,12 +70,11 @@ class ContactController {
             $execParams = array_merge($phones, [$userId]);
             $stmt->execute($execParams);
             $registeredUsers = $stmt->fetchAll();
-
             $registeredContacts = [];
             $driver = $db->getAttribute(PDO::ATTR_DRIVER_NAME);
             $sql = ($driver === 'sqlite')
-                ? "INSERT INTO contacts (user_id, contact_name, contact_phone) VALUES (:user_id, :contact_name, :contact_phone) ON CONFLICT(user_id, contact_phone) DO UPDATE SET contact_name = :contact_name"
-                : "INSERT INTO contacts (user_id, contact_name, contact_phone) VALUES (:user_id, :contact_name, :contact_phone) ON DUPLICATE KEY UPDATE contact_name = :contact_name";
+                ? "INSERT INTO contacts (user_id, contact_name, contact_phone) VALUES (:user_id, :contact_name, :contact_phone) ON CONFLICT(user_id, contact_phone) DO UPDATE SET contact_name = :contact_name_update"
+                : "INSERT INTO contacts (user_id, contact_name, contact_phone) VALUES (:user_id, :contact_name, :contact_phone) ON DUPLICATE KEY UPDATE contact_name = :contact_name_update";
             $insertStmt = $db->prepare($sql);
 
             foreach ($registeredUsers as $regUser) {
@@ -86,7 +85,8 @@ class ContactController {
                 $insertStmt->execute([
                     'user_id' => $userId,
                     'contact_name' => $customName,
-                    'contact_phone' => $phone
+                    'contact_phone' => $phone,
+                    'contact_name_update' => $customName
                 ]);
 
                 // Append custom display name based on user's local phone book preference

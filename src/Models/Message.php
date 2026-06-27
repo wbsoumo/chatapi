@@ -106,13 +106,14 @@ class Message {
         $db = Database::getConnection();
         $driver = $db->getAttribute(PDO::ATTR_DRIVER_NAME);
         $sql = ($driver === 'sqlite')
-            ? "INSERT INTO message_status (message_id, user_id, status) VALUES (:msg_id, :user_id, :status) ON CONFLICT(message_id, user_id) DO UPDATE SET status = :status, updated_at = CURRENT_TIMESTAMP"
-            : "INSERT INTO message_status (message_id, user_id, status) VALUES (:msg_id, :user_id, :status) ON DUPLICATE KEY UPDATE status = :status, updated_at = CURRENT_TIMESTAMP";
+            ? "INSERT INTO message_status (message_id, user_id, status) VALUES (:msg_id, :user_id, :status) ON CONFLICT(message_id, user_id) DO UPDATE SET status = :status_update, updated_at = CURRENT_TIMESTAMP"
+            : "INSERT INTO message_status (message_id, user_id, status) VALUES (:msg_id, :user_id, :status) ON DUPLICATE KEY UPDATE status = :status_update, updated_at = CURRENT_TIMESTAMP";
         $stmt = $db->prepare($sql);
         return $stmt->execute([
             'msg_id' => $messageId,
             'user_id' => $userId,
-            'status' => $status
+            'status' => $status,
+            'status_update' => $status
         ]);
     }
 
@@ -120,13 +121,14 @@ class Message {
         $db = Database::getConnection();
         $driver = $db->getAttribute(PDO::ATTR_DRIVER_NAME);
         $sql = ($driver === 'sqlite')
-            ? "INSERT INTO message_reactions (message_id, user_id, reaction) VALUES (:msg_id, :user_id, :reaction) ON CONFLICT(message_id, user_id) DO UPDATE SET reaction = :reaction, created_at = CURRENT_TIMESTAMP"
-            : "INSERT INTO message_reactions (message_id, user_id, reaction) VALUES (:msg_id, :user_id, :reaction) ON DUPLICATE KEY UPDATE reaction = :reaction, created_at = CURRENT_TIMESTAMP";
+            ? "INSERT INTO message_reactions (message_id, user_id, reaction) VALUES (:msg_id, :user_id, :reaction) ON CONFLICT(message_id, user_id) DO UPDATE SET reaction = :reaction_update, created_at = CURRENT_TIMESTAMP"
+            : "INSERT INTO message_reactions (message_id, user_id, reaction) VALUES (:msg_id, :user_id, :reaction) ON DUPLICATE KEY UPDATE reaction = :reaction_update, created_at = CURRENT_TIMESTAMP";
         $stmt = $db->prepare($sql);
         return $stmt->execute([
             'msg_id' => $messageId,
             'user_id' => $userId,
-            'reaction' => $reaction
+            'reaction' => $reaction,
+            'reaction_update' => $reaction
         ]);
     }
 
