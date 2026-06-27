@@ -40,7 +40,7 @@ class Fast2SMSService {
 
             $body = json_decode($response->getBody()->getContents(), true);
             
-            if (isset($body['status']) && $body['status'] === true) {
+            if ((isset($body['return']) && $body['return'] === true) || (isset($body['status']) && $body['status'] === true)) {
                 Logger::info("Fast2SMS: OTP sent successfully to $mobileNumber");
                 return true;
             }
