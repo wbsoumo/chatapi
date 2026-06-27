@@ -38,10 +38,18 @@ set_exception_handler(function ($e) {
 $requestUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 // Strip subdirectory prefix if deployed under folder
 $scriptName = dirname($_SERVER['SCRIPT_NAME']);
-if ($scriptName !== '/') {
-    $requestUri = str_replace($scriptName, '', $requestUri);
+if ($scriptName !== '/' && $scriptName !== '\\') {
+    $scriptName = rtrim(str_replace('\\', '/', $scriptName), '/');
+    if (str_starts_with($requestUri, $scriptName)) {
+        $requestUri = substr($requestUri, strlen($scriptName));
+    }
 }
 $requestUri = '/' . trim($requestUri, '/');
+
+// Normalize requestUri so it always starts with /api
+if (!str_starts_with($requestUri, '/api')) {
+    $requestUri = '/api' . $requestUri;
+}
 
 $method = $_SERVER['REQUEST_METHOD'];
 
