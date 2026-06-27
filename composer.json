@@ -3,7 +3,7 @@
     "description": "Production-Grade Backend API for a WhatsApp-Like Android Chat Application",
     "type": "project",
     "require": {
-        "php": ">=8.3",
+        "php": ">=8.2",
         "cboden/ratchet": "^0.4.4",
         "firebase/php-jwt": "^6.10",
         "vlucas/phpdotenv": "^5.6",
