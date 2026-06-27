@@ -39,12 +39,12 @@ class Conversation {
                    other_p.last_seen AS partner_last_seen
             FROM conversations c
             JOIN conversation_members cm ON c.id = cm.conversation_id AND cm.user_id = :user_id
-            JOIN conversation_members other_cm ON c.id = other_cm.conversation_id AND other_cm.user_id != :user_id
+            JOIN conversation_members other_cm ON c.id = other_cm.conversation_id AND other_cm.user_id != :user_id_2
             JOIN users other_u ON other_cm.user_id = other_u.id
             JOIN profiles other_p ON other_u.id = other_p.user_id
             WHERE c.id = :id
         ");
-        $stmt->execute(['id' => $id, 'user_id' => $requestingUserId]);
+        $stmt->execute(['id' => $id, 'user_id' => $requestingUserId, 'user_id_2' => $requestingUserId]);
         $conversation = $stmt->fetch();
 
         if ($conversation) {
@@ -94,12 +94,12 @@ class Conversation {
                    other_p.last_seen AS partner_last_seen
             FROM conversations c
             JOIN conversation_members cm ON c.id = cm.conversation_id AND cm.user_id = :user_id
-            JOIN conversation_members other_cm ON c.id = other_cm.conversation_id AND other_cm.user_id != :user_id
+            JOIN conversation_members other_cm ON c.id = other_cm.conversation_id AND other_cm.user_id != :user_id_2
             JOIN users other_u ON other_cm.user_id = other_u.id
             JOIN profiles other_p ON other_u.id = other_p.user_id
             ORDER BY c.updated_at DESC
         ");
-        $stmt->execute(['user_id' => $userId]);
+        $stmt->execute(['user_id' => $userId, 'user_id_2' => $userId]);
         $conversations = $stmt->fetchAll();
 
         foreach ($conversations as &$conv) {
